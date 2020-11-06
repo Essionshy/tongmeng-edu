@@ -1,0 +1,39 @@
+server:
+  port: 8003
+
+spring:
+  application:
+    name: tongmeng-service-member #服务名称
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.0.105:3306/tongmeng_edu?serverTimezone=GMT&useUnicode=true&useSSL=false&characterEncoding=utf8
+    username: root
+    password: root-xz
+  cloud:
+    nacos:
+      config:
+        server-addr: loalhost:8848
+      discovery:
+        server-addr: localhost:8848
+        namespace: 5d485cb1-12bf-49a5-a881-35b812e1c5ea
+
+  redis:
+    port: 6379
+    host: 192.168.0.102
+
+
+mybatis-plus:
+  type-aliases-package: com.tingyu.tongmeng.edu.service.member.entity
+  mapper-locations: classpath*:mybatis/mapper/**/*Mapper.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+management:
+  endpoints:
+    web:
+      exposure:
+        include=*:

@@ -1,0 +1,71 @@
+server:
+  port: 88
+
+spring:
+  application:
+    name: tongmeng-service-gateway #服务名称
+
+  cloud:
+    nacos:
+      config:
+        server-addr: loalhost:8848
+
+      discovery:
+        server-addr: localhost:8848
+        namespace: 5d485cb1-12bf-49a5-a881-35b812e1c5ea
+
+    gateway:
+      routes:
+        - id: tongmeng-service-edu-route #
+          uri: lb://tongmeng-service-edu
+          predicates:
+            - Path=/edu/**
+        - id: tongmeng-service-member-route #
+          uri: lb://tongmeng-service-member
+          predicates:
+            - Path=/member/**
+        - id: tongmeng-service-acl-route #
+          uri: lb://tongmeng-service-acl
+          predicates:
+            - Path=/admin/sys/**
+        - id: tongmeng-service-order-route #
+          uri: lb://tongmeng-service-order
+          predicates:
+            - Path=/order/**
+        - id: tongmeng-service-pay-route #
+          uri: lb://tongmeng-service-pay
+          predicates:
+            - Path=/pay/**
+        - id: tongmeng-service-rms-route #
+          uri: lb://tongmeng-service-rms
+          predicates:
+            - Path=/rms/**
+        - id: tongmeng-service-sas-route #
+          uri: lb://tongmeng-service-sas
+          predicates:
+            - Path=/sas/**
+        - id: tongmeng-service-pay-route #
+          uri: lb://tongmeng-service-pay
+          predicates:
+            - Path=/pay/**
+        - id: tongmeng-service-vod-route #
+          uri: lb://tongmeng-service-vod
+          predicates:
+            - Path=/vod/**
+        - id: tongmeng-service-oss-route #
+          uri: lb://tongmeng-service-oss
+          predicates:
+            - Path=/oss/**
+        - id: tongmeng-service-sms-route #
+          uri: lb://tongmeng-service-sms
+          predicates:
+            - Path=/sms/**
+  redis:
+    port: 6379
+    host: 192.168.0.102
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include=*:
