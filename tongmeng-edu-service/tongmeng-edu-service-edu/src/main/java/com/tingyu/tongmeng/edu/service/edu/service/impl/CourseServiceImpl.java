@@ -195,6 +195,7 @@ public class CourseServiceImpl extends ServiceImpl<CourseMapper, Course> impleme
         return courseList;
     }
 
+
     @Override
     public Map<String, Object> getCourseListByPage(Page<Course> coursePage, CourseQueryVo courseQueryVo) {
 

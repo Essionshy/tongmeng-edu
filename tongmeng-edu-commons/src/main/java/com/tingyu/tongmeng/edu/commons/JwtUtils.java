@@ -96,6 +96,8 @@ public class JwtUtils {
             //token不存在则抛
             throw new ResultException(28004,"用户未登录");
 
+        }else if (!validateToken(token)){
+            throw new ResultException(28004,"token 已过期");
         }else{
             Jws<Claims> claimsJws = Jwts.parser().setSigningKey(KEY_SECRET).parseClaimsJws(token);
             Claims claims = claimsJws.getBody();

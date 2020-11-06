@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tingyu.tongmeng.edu.service.edu.dao.TeacherMapper;
 import com.tingyu.tongmeng.edu.service.edu.entity.Teacher;
 import com.tingyu.tongmeng.edu.service.edu.service.TeacherService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -23,6 +24,8 @@ import java.util.Map;
 @Service
 public class TeacherServiceImpl extends ServiceImpl<TeacherMapper, Teacher> implements TeacherService {
 
+
+    @Cacheable(value = "teacherList",key = "'getTeacherList'")
     @Override
     public Map<String, Object> getTeacherList(Integer page, Integer limit) {
 

@@ -14,7 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 @RequestMapping("vod/video")
-@CrossOrigin
+//@CrossOrigin
+
 public class VodController {
 
     @Autowired
@@ -45,6 +46,7 @@ public class VodController {
     public R getAuth(@PathVariable("vid")String vid){
 
         String auth = vodService.getAuth(vid);
+        System.out.println(auth);
         return R.ok().data("auth",auth);
     }
 

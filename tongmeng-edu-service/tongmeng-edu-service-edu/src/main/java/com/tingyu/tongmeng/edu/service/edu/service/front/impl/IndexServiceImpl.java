@@ -44,7 +44,7 @@ public class IndexServiceImpl implements IndexService {
 
     }
 
-    @Cacheable(value = "teacher",key = "'getTeacherList'")
+   // @Cacheable(value = "teacher",key = "'getTeacherList'")
     public List<Teacher> getTeacherList() {
         QueryWrapper<Teacher> teacherWrapper = new QueryWrapper<>();
         teacherWrapper.orderByDesc("id");
@@ -52,7 +52,7 @@ public class IndexServiceImpl implements IndexService {
         return teacherService.list(teacherWrapper);
     }
 
-    @Cacheable(value = "course",key = "'getCourseList'")
+  //  @Cacheable(value = "course",key = "'getCourseList'")
     public List<Course> getCourseList() {
         QueryWrapper<Course> courseWrapper = new QueryWrapper<>();
         courseWrapper.orderByDesc("view_count");
