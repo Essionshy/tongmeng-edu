@@ -45,6 +45,13 @@ public class PermissionController {
 
     }
 
+
+    @PostMapping("save")
+    public R save(@RequestBody PermissionVo permissionVo){
+        permissionService.save(permissionVo);
+        return R.ok();
+    }
+
     @ApiOperation("更新用户")
     @PutMapping("update")
     public R update(@RequestBody PermissionVo permissionVo){
@@ -57,10 +64,20 @@ public class PermissionController {
         }
     }
 
-    @PostMapping("allot")
-    public R allot( String roleId, String[] permissionIds) {
+    @ApiOperation("根据角色ID获取权限")
+    @GetMapping("toAssign/{roleId}")
+    public R toAssign(@PathVariable("roleId") String roleId){
+        List<PermissionVo> permissionVoList = permissionService.listPermissionListByRoleId(roleId);
+        return R.ok().data("permissionList",permissionVoList);
+    }
 
-        boolean isSuccess = permissionService.allotPermissionToRole(roleId, permissionIds);
+
+    @ApiOperation("根据角色ID分配权限")
+    @PostMapping("doAssign/{roleId}")
+    public R doAssign(@PathVariable("roleId") String roleId, @RequestBody List<String> permissionIds) {
+
+        System.out.println(permissionIds);
+        boolean isSuccess = permissionService.doAssign(roleId, permissionIds);
         if (isSuccess) {
 
             return R.ok();

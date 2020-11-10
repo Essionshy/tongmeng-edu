@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: tongmeng-edu-aliyun-sms # 阿里云短信服务
+  cloud:
+    nacos:
+      config:
+        server-addr: 192.168.0.105:8848
+        namespace: ad78fa9d-52a8-44ad-864a-5201f8d4b569
+        file-extension: properties
+      discovery:
+        server-addr: 192.168.0.105:8848
+        namespace: ad78fa9d-52a8-44ad-864a-5201f8d4b569

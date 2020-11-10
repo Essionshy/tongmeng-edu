@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: tongmeng-edu-aliyun-oss
+  cloud:
+    nacos:
+      config:
+        server-addr: 192.168.0.105:8848
+        namespace: ad78fa9d-52a8-44ad-864a-5201f8d4b569
+        file-extension: properties #指定nacos配置中心配置文件扩展名，否则加载不到配置文件
+      discovery:
+        server-addr: 192.168.0.105:8848
+        namespace: ad78fa9d-52a8-44ad-864a-5201f8d4b569

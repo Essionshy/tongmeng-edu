@@ -1,6 +1,7 @@
 package com.tingyu.tongmeng.edu.service.edu.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -52,6 +53,7 @@ public class Teacher implements Serializable {
 
     @ApiModelProperty(value = "????ʱ?")
     @TableField(fill = FieldFill.INSERT)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date gmtCreate;
 
     @ApiModelProperty(value = "????ʱ?")

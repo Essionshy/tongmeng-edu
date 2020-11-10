@@ -8,6 +8,7 @@ import com.tingyu.tongmeng.edu.service.acl.service.UserRoleService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -33,5 +34,62 @@ public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole> i
 
         });
         return roleIds;
+    }
+
+    @Override
+    public boolean saveByUserId(String userId, String[] roleIds) {
+
+        List<String> existsRoleIds = listRoleIdsByUserId(userId);
+
+        List<String> saveRoleIds=new ArrayList<>();
+
+        for (String roleId:roleIds){
+            if(!existsRoleIds.contains(roleId)){
+                saveRoleIds.add(roleId);
+            }
+
+        }
+
+        //批量构造要保存的角色对象
+        List<UserRole> userRoleList=new ArrayList<>();
+        for(String roleId :saveRoleIds){
+            UserRole userRole = new UserRole();
+            userRole.setUserId(userId);
+            userRole.setRoleId(roleId);
+            userRoleList.add(userRole);
+        }
+        return this.saveBatch(userRoleList);
+    }
+
+    @Override
+    public boolean removeByUserId(String userId, String[] roleIds) {
+
+        //删除表示前端传入的角色id小于已经存在的角色
+        List<String> existsRoleIds = listRoleIdsByUserId(userId);
+
+        List<String> frontRoleIds = Arrays.asList(roleIds);
+
+        for(String roleId:existsRoleIds){
+
+            if(!frontRoleIds.contains(roleId)){
+                //移除多余的角色
+                this.removeByUserIdAndRoleId(userId,roleId);
+
+            }
+
+        }
+        return true;
+    }
+
+    @Override
+    public void removeByUserIdAndRoleId(String userId, String roleId) {
+        QueryWrapper<UserRole> wrapper = new QueryWrapper<>();
+        wrapper.eq("user_id",userId);
+        wrapper.eq("role_id",roleId);
+
+        int count = baseMapper.delete(wrapper);
+
+
+
     }
 }

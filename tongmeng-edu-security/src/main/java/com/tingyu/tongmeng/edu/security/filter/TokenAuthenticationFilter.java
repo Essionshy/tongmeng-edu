@@ -44,6 +44,7 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws IOException, ServletException {
         logger.info("================="+req.getRequestURI());
+        //TODO 修改为admin
         if(req.getRequestURI().indexOf("admin") == -1) {
             chain.doFilter(req, res);
             return;
@@ -69,7 +70,6 @@ public class TokenAuthenticationFilter extends BasicAuthenticationFilter {
         String token = request.getHeader("token");
         if (token != null && !"".equals(token.trim())) {
             String userName = tokenManager.getUserFromToken(token);
-
             List<String> permissionValueList = (List<String>) redisTemplate.opsForValue().get(userName);
             //已授权的集合
             Collection<GrantedAuthority> authorities = new ArrayList<>();

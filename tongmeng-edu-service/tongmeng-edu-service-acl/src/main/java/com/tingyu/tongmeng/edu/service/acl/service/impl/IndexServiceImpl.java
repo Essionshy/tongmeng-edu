@@ -6,8 +6,6 @@ import com.tingyu.tongmeng.edu.service.acl.service.IndexService;
 import com.tingyu.tongmeng.edu.service.acl.service.PermissionService;
 import com.tingyu.tongmeng.edu.service.acl.service.RoleService;
 import com.tingyu.tongmeng.edu.service.acl.service.UserService;
-import com.tingyu.tongmeng.edu.service.acl.utils.MenuBuilderUtil;
-import com.tingyu.tongmeng.edu.service.acl.vo.PermissionVo;
 import com.tingyu.tongmeng.edu.service.acl.vo.RoleVo;
 import com.tingyu.tongmeng.edu.service.acl.vo.UserVo;
 import lombok.extern.slf4j.Slf4j;
@@ -45,10 +43,10 @@ public class IndexServiceImpl implements IndexService {
         //2.查询用户的角色信息
         List<RoleVo> roleList = roleService.listByUserId(user.getId());
         //3.查询用户的权限信息
-        List<PermissionVo> permissionList = permissionService.listPermissionListByUserId(user.getId());
+        List<String> permissionValueList=permissionService.listPermissionValueByUserId(user.getId());
         map.put("userInfo", user);
         map.put("roleList", roleList);
-        map.put("permissionList", permissionList);
+        map.put("permissionValueList", permissionValueList);
         return map;
     }
 
@@ -57,10 +55,7 @@ public class IndexServiceImpl implements IndexService {
 
         UserVo user = userService.getByUsername(username);
 
-        List<PermissionVo> permissionVoList = permissionService.listPermissionListByUserId(user.getId());
-
-        List<JSONObject> menu = MenuBuilderUtil.bulid(permissionVoList);
-
+        List<JSONObject> menu = permissionService.selectPermissionByUserId(user.getId());
         return menu;
     }
 

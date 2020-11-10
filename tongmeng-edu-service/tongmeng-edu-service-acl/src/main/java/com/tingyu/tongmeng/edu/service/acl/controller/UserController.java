@@ -71,7 +71,7 @@ public class UserController {
 
     @ApiOperation("批量删除用户")
     @DeleteMapping("delete/batch")
-    public R deleteByBatch(String [] ids){
+    public R deleteByBatch(@RequestBody String [] ids){
 
         int count=userService.deleteBatchByIds(ids);
 
@@ -84,6 +84,19 @@ public class UserController {
 
         UserVo user = userService.getUserById(id);
         return R.ok().data("user",user);
+    }
+
+
+    @GetMapping("toAssign/{userId}")
+    public R toAssign(@PathVariable("userId")String userId){
+        Map<String ,Object> map = userService.listRoleByUserId(userId);
+        return R.ok().data(map);
+    }
+
+    @PostMapping("doAssign/{userId}")
+    public R doAssign(@PathVariable("userId")String userId,@RequestBody String[] roleIds){
+        userService.doAssign(userId,roleIds);
+        return R.ok();
     }
 
 }

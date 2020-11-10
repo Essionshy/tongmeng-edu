@@ -31,4 +31,9 @@ public interface UserService extends IService<User> {
     int deleteBatchByIds(String[] ids);
 
     UserVo getUserById(String id);
+
+
+    Map<String,Object> listRoleByUserId(String userId);
+
+    boolean doAssign(String userId, String[] roleIds);
 }

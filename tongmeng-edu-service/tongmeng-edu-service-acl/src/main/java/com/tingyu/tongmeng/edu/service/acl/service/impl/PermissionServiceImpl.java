@@ -10,7 +10,7 @@ import com.tingyu.tongmeng.edu.service.acl.entity.User;
 import com.tingyu.tongmeng.edu.service.acl.entity.UserRole;
 import com.tingyu.tongmeng.edu.service.acl.service.*;
 import com.tingyu.tongmeng.edu.service.acl.utils.MenuBuilderUtil;
-import com.tingyu.tongmeng.edu.service.acl.utils.PermissionTreeBuilderUtil;
+import com.tingyu.tongmeng.edu.service.acl.utils.PermissionUtil;
 import com.tingyu.tongmeng.edu.service.acl.vo.PermissionVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -52,7 +52,7 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         List<Permission> permissionList = baseMapper.selectList(null);
 
         //2.将查询的结果集以树形结构方式返回
-        List<PermissionVo> permissionVoList = PermissionTreeBuilderUtil.build(permissionList);
+        List<PermissionVo> permissionVoList = PermissionUtil.build(PermissionUtil.convertFromPermission(permissionList));
 
         return permissionVoList;
     }
@@ -68,9 +68,43 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     }
 
     @Override
-    public boolean allotPermissionToRole(String roleId, String[] permissionIds) {
+    public boolean doAssign(String roleId, List<String> permissionIds) {
+        boolean isSuccess = false;
         List<RolePermission> rolePermissionList = new ArrayList<>();
-        for (String permissionId : permissionIds) {
+
+        //根据角色ID查询出该角色所拥有的权限列表
+        List<String> rolePermissionIdList = rolePermissionService.getPermissionIdsByRoleId(roleId);
+
+        //判断是新增还是删除
+        if (permissionIds.size() > rolePermissionIdList.size()) {
+            //新增
+
+            isSuccess = saveRolePermission(roleId, permissionIds, rolePermissionList, rolePermissionIdList);
+
+        } else {
+            //删除
+            removeRolePermission(roleId, permissionIds, rolePermissionIdList);
+            isSuccess = true;
+
+        }
+        return isSuccess;
+    }
+
+    public void removeRolePermission(String roleId, List<String> permissionIds, List<String> rolePermissionIdList) {
+
+        List<String> removePermissionIds = getRemovePermissionIds(rolePermissionIdList, permissionIds);
+
+
+        for (String removePermissionId : removePermissionIds) {
+            rolePermissionService.removeByRoleIdAndPermissionId(roleId, removePermissionId);
+        }
+    }
+
+    public boolean saveRolePermission(String roleId, List<String> permissionIds, List<RolePermission> rolePermissionList, List<String> rolePermissionIdList) {
+        boolean isSuccess;
+        List<String> savePermissionIds = getInsertPermissionIds(rolePermissionIdList, permissionIds);
+
+        for (String permissionId : savePermissionIds) {
             RolePermission rolePermission = new RolePermission();
             rolePermission.setPermissionId(permissionId);
             rolePermission.setRoleId(roleId);
@@ -78,9 +112,41 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
 
         }
 
-        boolean isSuccess = rolePermissionService.saveBatch(rolePermissionList);
-
+        isSuccess = rolePermissionService.saveBatch(rolePermissionList);
         return isSuccess;
+    }
+
+    private List<String> getRemovePermissionIds(List<String> rolePermissionIdList, List<String> permissionIds) {
+
+        List<String> removePermissionIds = new ArrayList<>();
+
+        for (String rolePermissionId : rolePermissionIdList) {
+
+            if (!permissionIds.contains(rolePermissionId)) {
+                removePermissionIds.add(rolePermissionId);
+            }
+
+        }
+
+
+        return removePermissionIds;
+    }
+
+    private List<String> getInsertPermissionIds(List<String> rolePermissionIdList, List<String> permissionIds) {
+
+        List<String> insertList = new ArrayList<>();
+
+        if (rolePermissionIdList.isEmpty()) {
+            return permissionIds;
+        } else {
+            for (int i = 0; i < permissionIds.size(); i++) {
+                String savePermissionId = permissionIds.get(i);
+                if (!rolePermissionIdList.contains(savePermissionId)) {
+                    insertList.add(savePermissionId);
+                }
+            }
+        }
+        return insertList;
     }
 
     @Override
@@ -150,12 +216,13 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
 
     @Override
     public List<PermissionVo> listPermissionListByUserId(String id) {
+        List<PermissionVo> permissionVoList=null;
+        List<String> permissionIds = this.listPermissionIdsByUserId(id);
+        if(!permissionIds.isEmpty()){
+            List<Permission> permissions = baseMapper.selectBatchIds(permissionIds);
+            permissionVoList = PermissionUtil.build(PermissionUtil.convertFromPermission(permissions));
 
-
-        List<Permission> permissions = baseMapper.selectBatchIds(this.listPermissionIdsByUserId(id));
-
-        List<PermissionVo> permissionVoList = PermissionTreeBuilderUtil.build(permissions);
-
+        }
         return permissionVoList;
     }
 
@@ -167,7 +234,7 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         } else {
             List<Permission> permissions = baseMapper.selectBatchIds(this.listPermissionIdsByUserId(id));
 
-            permissionValueList = PermissionTreeBuilderUtil.getPermissionValueFromPermission(permissions);
+            permissionValueList = PermissionUtil.getPermissionValueFromPermission(permissions);
         }
         return permissionValueList;
     }
@@ -180,22 +247,74 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
         wrapper.eq("type", 2);
         wrapper.select("permission_value");
         List<Permission> permissionList = baseMapper.selectList(wrapper);
-        return PermissionTreeBuilderUtil.getPermissionValueFromPermission(permissionList);
+        return PermissionUtil.getPermissionValueFromPermission(permissionList);
     }
 
     @Override
     public List<JSONObject> selectPermissionByUserId(String userId) {
         List<PermissionVo> selectPermissionList;
-        if(this.isSysAdmin(userId)) {
+        if (this.isSysAdmin(userId)) {
             //如果是超级管理员，获取所有菜单
             selectPermissionList = listPermissionTree();
         } else {
             selectPermissionList = listPermissionListByUserId(userId);
         }
-        log.info("permissionByUserId:{}",selectPermissionList);
+        log.info("permissionByUserId:{}", selectPermissionList);
 
         List<JSONObject> result = MenuBuilderUtil.bulid(selectPermissionList);
         return result;
+    }
+
+    @Override
+    public List<PermissionVo> listPermissionListByRoleId(String roleId) {
+        List<PermissionVo> permissionVoList = null;
+        List<String> permissionList = rolePermissionService.getPermissionIdsByRoleId(roleId);
+
+        //获取所有权限非树形结构
+        List<PermissionVo> allPermissionList = this.listAllPermissionList();
+
+
+        if (!permissionList.isEmpty()) {
+            //某个角色已经拥有的权限列表
+
+            List<Permission> rolePermissionList = baseMapper.selectBatchIds(permissionList);
+
+            //查询所有权限非树形结构
+
+            for (int i = 0; i < allPermissionList.size(); i++) {
+
+                PermissionVo permissionVo = allPermissionList.get(i);
+
+                for (int j = 0; j < rolePermissionList.size(); j++) {
+                    Permission rolePermission = rolePermissionList.get(j);
+
+                    if (rolePermission.getId().equals(permissionVo.getId())) {
+                        permissionVo.setIsSelected(true);
+                    }
+                }
+
+            }
+
+        }
+
+        //构建权限树
+        permissionVoList = PermissionUtil.build(allPermissionList);
+        return permissionVoList;
+    }
+
+    @Override
+    public List<PermissionVo> listAllPermissionList() {
+        QueryWrapper<Permission> wrapper = new QueryWrapper<Permission>().orderByAsc("CAST(id AS SIGNED)");
+        List<Permission> permissions = baseMapper.selectList(wrapper);
+        return PermissionUtil.convertFromPermission(permissions);
+    }
+
+    @Override
+    public boolean save(PermissionVo permissionVo) {
+        Permission permission = new Permission();
+        BeanUtils.copyProperties(permissionVo, permission);
+        int count = baseMapper.insert(permission);
+        return count > 0;
     }
 
 

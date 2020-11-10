@@ -18,4 +18,6 @@ public interface RolePermissionService extends IService<RolePermission> {
     List<RolePermission> getByRoleId(String id);
 
      List<String> getPermissionIdsByRoleId(String roleId);
+
+    int removeByRoleIdAndPermissionId(String roleId, String permissionId);
 }

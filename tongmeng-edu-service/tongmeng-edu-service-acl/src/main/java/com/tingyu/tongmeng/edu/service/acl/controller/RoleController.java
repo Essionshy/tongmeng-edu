@@ -2,12 +2,15 @@ package com.tingyu.tongmeng.edu.service.acl.controller;
 
 
 import com.tingyu.tongmeng.edu.commons.R;
+import com.tingyu.tongmeng.edu.service.acl.entity.Role;
 import com.tingyu.tongmeng.edu.service.acl.service.RoleService;
 import com.tingyu.tongmeng.edu.service.acl.vo.RoleVo;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,6 +23,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/admin/sys/role")
+@Slf4j
 public class RoleController {
 
     @Autowired
@@ -73,13 +77,18 @@ public class RoleController {
         }
     }
 
-    @ApiOperation("批量删除用户")
+    @ApiOperation("批量删除角色")
     @DeleteMapping("delete/batch")
-    public R deleteByBatch(String [] ids){
-
-        Map<String,Object> map=roleService.deleteBatchByIds(ids);
-
-        return R.ok().data(map);
+    public R deleteByBatch(@RequestBody List<String> idList){
+        log.info("批量删除角色 ",idList.toString());
+        int count=roleService.deleteBatchByIds(idList);
+        return R.ok().data("count",count);
+    }
+    @ApiOperation("根据角色ID查询角色")
+    @GetMapping("get/{id}")
+    public R get(@PathVariable("id")String id){
+        Role role = roleService.getById(id);
+        return R.ok().data("role",role);
     }
 
 }

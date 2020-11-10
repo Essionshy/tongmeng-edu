@@ -51,6 +51,12 @@ public class PermissionVo {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date gmtCreate;
 
+    @ApiModelProperty(value = "菜单级别")
+    private Integer level;
+
+    @ApiModelProperty(value = "权限是否被选中")
+    private Boolean isSelected;
+
     @ApiModelProperty(value = "子菜单列表")
     private List<PermissionVo> children;
 

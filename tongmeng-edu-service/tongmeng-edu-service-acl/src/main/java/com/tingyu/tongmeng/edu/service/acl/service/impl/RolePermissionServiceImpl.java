@@ -44,15 +44,22 @@ public class RolePermissionServiceImpl extends ServiceImpl<RolePermissionMapper,
         QueryWrapper<RolePermission> wrapper = new QueryWrapper<>();
         wrapper.eq("role_id",roleId);
         wrapper.select("permission_id");
-
-
         List<RolePermission> rolePermissions = baseMapper.selectList(wrapper);
-
         rolePermissions.stream().forEach(rolePermission -> {
             permissionIds.add(rolePermission.getPermissionId());
         });
 
         return permissionIds;
+
+    }
+
+    @Override
+    public int removeByRoleIdAndPermissionId(String roleId,String permissionId){
+        QueryWrapper<RolePermission> wrapper = new QueryWrapper<>();
+        wrapper.eq("permission_id",permissionId);
+        wrapper.eq("role_id",roleId);
+        int count = baseMapper.delete(wrapper);
+        return count;
 
     }
 }

@@ -22,7 +22,7 @@ public interface PermissionService extends IService<Permission> {
     boolean delete(String id);
 
 
-    boolean allotPermissionToRole(String roleId, String[] permissionIds);
+    boolean doAssign(String roleId, List<String> permissionIds);
 
     List<String> listPermissionIdsByUserId(String id);
 
@@ -45,4 +45,9 @@ public interface PermissionService extends IService<Permission> {
 
     public List<JSONObject> selectPermissionByUserId(String userId);
 
+    List<PermissionVo> listPermissionListByRoleId(String roleId);
+
+    List<PermissionVo> listAllPermissionList();
+
+    boolean save(PermissionVo permissionVo);
 }

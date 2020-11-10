@@ -3,11 +3,15 @@ package com.tingyu.tongmeng.edu.service.acl.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.tingyu.tongmeng.edu.commons.MD5Utils;
 import com.tingyu.tongmeng.edu.service.acl.dao.UserMapper;
+import com.tingyu.tongmeng.edu.service.acl.entity.Role;
 import com.tingyu.tongmeng.edu.service.acl.entity.User;
 import com.tingyu.tongmeng.edu.service.acl.service.PermissionService;
 import com.tingyu.tongmeng.edu.service.acl.service.RoleService;
+import com.tingyu.tongmeng.edu.service.acl.service.UserRoleService;
 import com.tingyu.tongmeng.edu.service.acl.service.UserService;
+import com.tingyu.tongmeng.edu.service.acl.vo.RoleVo;
 import com.tingyu.tongmeng.edu.service.acl.vo.UserVo;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -32,6 +36,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private RoleService roleService;
+
+
+    @Autowired
+    private UserRoleService userRoleService;
 
     @Autowired
     private PermissionService permissionService;
@@ -77,6 +85,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         User user = new User();
         BeanUtils.copyProperties(userVo,user);
+        user.setPassword(MD5Utils.encrypt(userVo.getPassword()));
+
         int count = baseMapper.insert(user);
         return count>0;
     }
@@ -97,7 +107,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public int deleteBatchByIds(String[] ids) {
+    public int deleteBatchByIds( String[] ids) {
 
         List<String> idList=new ArrayList<>();
 
@@ -118,5 +128,48 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             BeanUtils.copyProperties(user,userVo);
         }
         return userVo;
+    }
+
+
+
+    @Override
+    public Map<String,Object> listRoleByUserId(String userId) {
+
+        Map<String,Object> map=new HashMap<>();
+        //获取所有角色列表
+        List<Role> allRoleList = roleService.list();
+
+        //获取
+        List<RoleVo> existsRoleList = roleService.listByUserId(userId);
+
+
+        map.put("allRoleList",allRoleList);
+        map.put("existsRoleList",existsRoleList);
+
+        return map;
+    }
+
+    @Override
+    public boolean doAssign(String userId, String[] roleIds) {
+
+        boolean isSuccess;
+        //判断是新增还是删除
+
+        List<RoleVo> roleVos = roleService.listByUserId(userId);
+        if(roleIds.length>roleVos.size()){
+            //给用户添加角色
+            isSuccess = userRoleService.saveByUserId(userId, roleIds);
+
+
+        }else {
+            //删除用户角色
+            isSuccess = userRoleService.removeByUserId(userId,roleIds);
+
+
+        }
+
+
+
+        return isSuccess;
     }
 }

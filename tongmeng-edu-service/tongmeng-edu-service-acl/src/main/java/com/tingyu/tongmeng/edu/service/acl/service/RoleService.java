@@ -27,5 +27,6 @@ public interface RoleService extends IService<Role> {
 
     boolean deleteByRoleId(String roleId);
 
-    Map<String, Object> deleteBatchByIds(String[] ids);
+   int deleteBatchByIds(List<String> ids);
+
 }

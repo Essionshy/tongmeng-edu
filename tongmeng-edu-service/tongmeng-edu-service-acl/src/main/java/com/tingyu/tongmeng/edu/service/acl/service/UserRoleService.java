@@ -16,4 +16,10 @@ import java.util.List;
 public interface UserRoleService extends IService<UserRole> {
 
     List<String> listRoleIdsByUserId(String userId);
+
+    boolean saveByUserId(String userId, String[] roleIds);
+
+    boolean removeByUserId(String userId, String[] roleIds);
+
+    void removeByUserIdAndRoleId(String userId, String roleId);
 }
